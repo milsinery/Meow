@@ -1,47 +1,117 @@
-if (figma.currentPage.selection.length > 0) {
-  const selected: SceneNode = figma.currentPage.selection[0];
+const createNewComponent = (firstOfSelection: SceneNode): ComponentNode => {
+  const newComponent: SceneNode = figma.createComponent();
 
-  if(selected.parent.type === "PAGE") {
-    const IDofSelected = selected.id;
-    const typeOfSelected = selected.type;
-    const widthOfSelected = selected.width;
-    const heightOfSelected = selected.height;
-    const xOfSelected = selected.x;
-    const yOfSelected = selected.y;
+  if (firstOfSelection.type === "FRAME") {
+    newComponent.name = firstOfSelection.name;
+    newComponent.resize(firstOfSelection.width, firstOfSelection.height);
+    newComponent.appendChild(firstOfSelection);
+    newComponent.x = firstOfSelection.x;
+    newComponent.y = firstOfSelection.y;
+    firstOfSelection.x = 0;
+    firstOfSelection.y = 0;
+    newComponent.cornerRadius = firstOfSelection.cornerRadius;
+    newComponent.fills = firstOfSelection.fills;
+    newComponent.expanded = false;
 
-    const newComponent: SceneNode = figma.createComponent();
-  
-    newComponent.resize(selected.width, selected.height);
-    newComponent.appendChild(selected);
-    newComponent.x = xOfSelected;
-    newComponent.y = yOfSelected;
-
-    selected.x = xOfSelected - newComponent.x;
-    selected.y = yOfSelected - newComponent.y;
-
-    const other: Array<SceneNode> = figma.currentPage.findAll(item => 
-      item.id !== IDofSelected && 
-      item.type === typeOfSelected && 
-      item.width === widthOfSelected && 
-      item.height === heightOfSelected);
-
-    if(other.length > 0) {
-      for(const item of other) {
-        const parent = item.parent;
-        const xOfChild = item.x;
-        const yOfChild = item.y;
-
-        const newChild = newComponent.createInstance();
-
-        parent.appendChild(newChild);
-
-        newChild.x = xOfChild;
-        newChild.y = yOfChild;
-
-        item.remove();
-      }
+    if(firstOfSelection.layoutMode !== "NONE") {
+      newComponent.layoutMode = firstOfSelection.layoutMode;
+      newComponent.layoutAlign = firstOfSelection.layoutAlign;
+      newComponent.layoutGrow = firstOfSelection.layoutGrow;
+      newComponent.itemSpacing = firstOfSelection.itemSpacing;
+      newComponent.primaryAxisAlignItems = firstOfSelection.primaryAxisAlignItems;
+      newComponent.primaryAxisSizingMode = firstOfSelection.primaryAxisSizingMode;
+      newComponent.paddingTop = firstOfSelection.paddingTop;
+      newComponent.paddingRight = firstOfSelection.paddingRight;
+      newComponent.paddingBottom = firstOfSelection.paddingBottom;
+      newComponent.paddingLeft = firstOfSelection.paddingLeft;
     }
-  }
-}
 
+    const children = firstOfSelection.children;
+
+    for (const item of children) {
+      newComponent.appendChild(item);
+    }
+
+    firstOfSelection.remove();
+  } else if (firstOfSelection.type === "GROUP") {
+    newComponent.name = firstOfSelection.name;
+    newComponent.resize(firstOfSelection.width, firstOfSelection.height);
+    newComponent.appendChild(firstOfSelection);
+    newComponent.x = firstOfSelection.x;
+    newComponent.y = firstOfSelection.y;
+    firstOfSelection.x = 0;
+    firstOfSelection.y = 0;
+    newComponent.expanded = false;
+
+    const children = firstOfSelection.children;
+
+    for (const item of children) {
+      newComponent.appendChild(item);
+    }
+  } else {
+    newComponent.name = firstOfSelection.name;
+    newComponent.resize(firstOfSelection.width, firstOfSelection.height);
+    newComponent.appendChild(firstOfSelection);
+    newComponent.x = firstOfSelection.x;
+    newComponent.y = firstOfSelection.y;
+    firstOfSelection.x = 0;
+    firstOfSelection.y = 0;
+    newComponent.expanded = false;
+  }
+
+  return newComponent;
+};
+
+const main = () => {
+  // проверяем, выделено ли что-то
+  if (figma.currentPage.selection.length === 0) return;
+
+  // сохраняем ссылку на выбранный объект
+  const firstOfSelection: SceneNode = figma.currentPage.selection[0];
+
+  const nameOfSelected = firstOfSelection.name;
+  const IDofSelected = firstOfSelection.id;
+  const typeOfSelected = firstOfSelection.type;
+
+  // проверяем, что выбранный элемент находится вне фрейма
+  if (firstOfSelection.parent.type !== "PAGE") return;
+
+  // проверяем, что выбранный элемент не компонент и не вариант
+  if (firstOfSelection.type === "COMPONENT_SET" || firstOfSelection.type === "COMPONENT") return;
+
+  // создаём компонент из выбранного объекта
+  const newComponent: ComponentNode = createNewComponent(firstOfSelection);
+
+  // собираем все остальные объекты на странице, похожие на выбранный
+  const other: Array<SceneNode> = figma.currentPage.findAll(
+    (item) =>
+      item.id !== IDofSelected &&
+      item.type === typeOfSelected &&
+      item.name === nameOfSelected && 
+      item.parent.type !== "PAGE"
+  );
+
+  // проверяем, что такие объекты есть
+  if (other.length === 0) return;
+
+  // создаём из таких объектов копии нашего компонента, удаляем оригиналы и вставляем копии на их место
+  for (const item of other) {
+    const parent = item.parent;
+    const xOfChild = item.x;
+    const yOfChild = item.y;
+    const rotation = item.rotation;
+
+    const newInstance = newComponent.createInstance();
+
+    parent.appendChild(newInstance);
+
+    newInstance.x = xOfChild;
+    newInstance.y = yOfChild;
+    newInstance.rotation = rotation;
+
+    item.remove();
+  }
+};
+
+main();
 figma.closePlugin();
