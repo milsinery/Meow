@@ -1,7 +1,7 @@
 {
-  "name": "lazy",
+  "name": "meow",
   "version": "1.0.0",
-  "description": "",
+  "description": "plugin for forgetful or lazy designers",
   "main": "code.js",
   "scripts": {
     "build": "tsc -p tsconfig.json"
