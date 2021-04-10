@@ -1,83 +1,69 @@
-const createNewComponent = (selection: SceneNode): ComponentNode => {
+const createNewComponent = (selection: FrameNode): ComponentNode => {
   const newComponent: SceneNode = figma.createComponent();
 
-  if (selection.type === "FRAME") {
-    newComponent.name = selection.name;
-    newComponent.resize(selection.width, selection.height);
-    newComponent.appendChild(selection);
-    newComponent.x = selection.x;
-    newComponent.y = selection.y;
-    selection.x = 0;
-    selection.y = 0;
-    newComponent.cornerRadius = selection.cornerRadius;
-    newComponent.fills = selection.fills;
-    newComponent.expanded = false;
+  newComponent.name = selection.name;
+  newComponent.resize(selection.width, selection.height);
+  newComponent.appendChild(selection);
+  newComponent.x = selection.x;
+  newComponent.y = selection.y;
+  selection.x = 0;
+  selection.y = 0;
+  newComponent.cornerRadius = selection.cornerRadius;
+  newComponent.fills = selection.fills;
+  newComponent.clipsContent = selection.clipsContent;
+  newComponent.strokes = selection.strokes;
+  newComponent.strokeWeight = selection.strokeWeight;
+  newComponent.strokeMiterLimit = selection.strokeMiterLimit;
+  newComponent.strokeAlign = selection.strokeAlign;
+  newComponent.strokeCap = selection.strokeCap;
+  newComponent.strokeJoin = selection.strokeJoin;
+  newComponent.dashPattern = selection.dashPattern;
+  newComponent.fillStyleId = selection.fillStyleId;
+  newComponent.strokeStyleId = selection.strokeStyleId;
+  newComponent.strokeStyleId = selection.strokeStyleId;
+  newComponent.expanded = false;
 
-    if(selection.layoutMode !== "NONE") {
-      newComponent.layoutMode = selection.layoutMode;
-      newComponent.layoutAlign = selection.layoutAlign;
-      newComponent.layoutGrow = selection.layoutGrow;
-      newComponent.itemSpacing = selection.itemSpacing;
-      newComponent.primaryAxisAlignItems = selection.primaryAxisAlignItems;
-      newComponent.primaryAxisSizingMode = selection.primaryAxisSizingMode;
-      newComponent.paddingTop = selection.paddingTop;
-      newComponent.paddingRight = selection.paddingRight;
-      newComponent.paddingBottom = selection.paddingBottom;
-      newComponent.paddingLeft = selection.paddingLeft;
-    }
 
-    const children = selection.children;
-
-    for (const item of children) {
-      newComponent.appendChild(item);
-    }
-
-    selection.remove();
-  } else if (selection.type === "GROUP") {
-    newComponent.name = selection.name;
-    newComponent.resize(selection.width, selection.height);
-    newComponent.appendChild(selection);
-    newComponent.x = selection.x;
-    newComponent.y = selection.y;
-    selection.x = 0;
-    selection.y = 0;
-    newComponent.expanded = false;
-
-    const children = selection.children;
-
-    for (const item of children) {
-      newComponent.appendChild(item);
-    }
-  } else {
-    newComponent.name = selection.name;
-    newComponent.resize(selection.width, selection.height);
-    newComponent.appendChild(selection);
-    newComponent.x = selection.x;
-    newComponent.y = selection.y;
-    selection.x = 0;
-    selection.y = 0;
-    newComponent.expanded = false;
+  if (selection.layoutMode !== 'NONE') {
+    newComponent.layoutMode = selection.layoutMode;
+    newComponent.layoutAlign = selection.layoutAlign;
+    newComponent.layoutGrow = selection.layoutGrow;
+    newComponent.itemSpacing = selection.itemSpacing;
+    newComponent.primaryAxisAlignItems = selection.primaryAxisAlignItems;
+    newComponent.primaryAxisSizingMode = selection.primaryAxisSizingMode;
+    newComponent.paddingTop = selection.paddingTop;
+    newComponent.paddingRight = selection.paddingRight;
+    newComponent.paddingBottom = selection.paddingBottom;
+    newComponent.paddingLeft = selection.paddingLeft;
   }
+
+  const children = selection.children;
+
+  for (const item of children) {
+    newComponent.appendChild(item);
+  }
+
+  selection.remove();
 
   return newComponent;
 };
 
 const convertChildrenToInstances = (component, children) => {
   for (const item of children) {
-    const parent = item.parent;
-    const xOfChild = item.x;
-    const yOfChild = item.y;
-    const rotation = item.rotation;
-    const name = item.name;
+    const { parent, x, y, rotation, name, fills, strokeCap, strokeAlign, strokeJoin } = item;
 
     const newInstance = component.createInstance();
 
     parent.appendChild(newInstance);
 
-    newInstance.x = xOfChild;
-    newInstance.y = yOfChild;
+    newInstance.x = x;
+    newInstance.y = y;
     newInstance.rotation = rotation;
     newInstance.name = name;
+    newInstance.fills = fills;
+    newInstance.strokeCap = strokeCap;
+    newInstance.strokeAlign = strokeAlign;
+    newInstance.strokeJoin = strokeJoin;
 
     item.remove();
   }
@@ -88,18 +74,14 @@ const main = () => {
   if (figma.currentPage.selection.length > 1 || figma.currentPage.selection.length === 0) return;
 
   // проверяем, что выбран фрейм
-  // if(figma.currentPage.selection[0].type !== "FRAME") return;
+  if (figma.currentPage.selection[0].type !== 'FRAME') return;
 
   // проверяем, что выбранный объект вне фреймов
-  if(figma.currentPage.selection[0].parent.type !== "PAGE") return;
+  if (figma.currentPage.selection[0].parent.type !== 'PAGE') return;
 
   // сохраняем ссылку на выбранный объект
   const selection: SceneNode = figma.currentPage.selection[0];
-  const { name, id, type } = figma.currentPage.selection[0];
-  const childrenCount = selection.type === "FRAME" ? selection.children.length : 0;
-
-  // проверяем, что выбранный элемент находится вне фрейма
-  if (selection.parent.type !== "PAGE") return;
+  const { id, type, children } = selection;
 
   // создаём компонент из выбранного объекта
   const newComponent: ComponentNode = createNewComponent(selection);
@@ -107,11 +89,13 @@ const main = () => {
   // собираем все остальные объекты на странице, похожие на выбранный
   const other: Array<SceneNode> = figma.currentPage.findAll(
     (item) =>
-      item.parent.type !== "PAGE" &&
+      item.parent.type !== 'PAGE' &&
       item.id !== id &&
-      item.type === type &&
-      item.name.startsWith (name) &&
-      item?.children?.length === childrenCount
+      item.type === 'FRAME' &&
+      item.children.length === children.length &&
+      (item.children.length > 0 && item.children[0].name === children[0].name) &&
+      (item.children.length > 0 && item.children[0].type === children[0].type) && 
+      (item.children.length > 0 && item.children[item.children.length - 1].type === children[item.children.length - 1].type)
   );
 
   // проверяем, что такие объекты есть
