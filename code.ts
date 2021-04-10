@@ -67,6 +67,7 @@ const convertChildrenToInstances = (component, children) => {
 
     item.remove();
   }
+  figma.notify("🐈‍");
 };
 
 const main = () => {
@@ -88,7 +89,7 @@ const main = () => {
 
   // собираем все остальные объекты на странице, похожие на выбранный
   const other: Array<SceneNode> = figma.currentPage.findAll(
-    (item) =>
+    (item) => 
       item.parent.type !== 'PAGE' &&
       item.id !== id &&
       item.type === 'FRAME' &&

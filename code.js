@@ -55,6 +55,7 @@ const convertChildrenToInstances = (component, children) => {
         newInstance.strokeJoin = strokeJoin;
         item.remove();
     }
+    figma.notify("🐈‍");
 };
 const main = () => {
     // проверяем, выделено ли что-то
