@@ -6,6 +6,7 @@ const createNewComponent = (selection: FrameNode): ComponentNode => {
   newComponent.appendChild(selection);
   newComponent.x = selection.x;
   newComponent.y = selection.y;
+  newComponent.rotation = selection.rotation;
   selection.x = 0;
   selection.y = 0;
   newComponent.cornerRadius = selection.cornerRadius;
@@ -82,7 +83,7 @@ const main = () => {
 
   // сохраняем ссылку на выбранный объект
   const selection: SceneNode = figma.currentPage.selection[0];
-  const { id, type, children } = selection;
+  const { id, children, layoutMode, cornerRadius, counterAxisAlignItems, primaryAxisAlignItems, clipsContent } = selection;
 
   // создаём компонент из выбранного объекта
   const newComponent: ComponentNode = createNewComponent(selection);
@@ -93,10 +94,12 @@ const main = () => {
       item.parent.type !== 'PAGE' &&
       item.id !== id &&
       item.type === 'FRAME' &&
-      item.children.length === children.length &&
-      (item.children.length > 0 && item.children[0].name === children[0].name) &&
-      (item.children.length > 0 && item.children[0].type === children[0].type) && 
-      (item.children.length > 0 && item.children[item.children.length - 1].type === children[item.children.length - 1].type)
+      item.layoutMode === layoutMode && 
+      item.cornerRadius === cornerRadius && 
+      item.counterAxisAlignItems === counterAxisAlignItems && 
+      item.primaryAxisAlignItems === primaryAxisAlignItems && 
+      item.clipsContent === clipsContent && 
+      item.children.length === children.length
   );
 
   // проверяем, что такие объекты есть

@@ -5,6 +5,7 @@ const createNewComponent = (selection) => {
     newComponent.appendChild(selection);
     newComponent.x = selection.x;
     newComponent.y = selection.y;
+    newComponent.rotation = selection.rotation;
     selection.x = 0;
     selection.y = 0;
     newComponent.cornerRadius = selection.cornerRadius;
@@ -69,17 +70,19 @@ const main = () => {
         return;
     // сохраняем ссылку на выбранный объект
     const selection = figma.currentPage.selection[0];
-    const { id, type, children } = selection;
+    const { id, children, layoutMode, cornerRadius, counterAxisAlignItems, primaryAxisAlignItems, clipsContent } = selection;
     // создаём компонент из выбранного объекта
     const newComponent = createNewComponent(selection);
     // собираем все остальные объекты на странице, похожие на выбранный
     const other = figma.currentPage.findAll((item) => item.parent.type !== 'PAGE' &&
         item.id !== id &&
         item.type === 'FRAME' &&
-        item.children.length === children.length &&
-        (item.children.length > 0 && item.children[0].name === children[0].name) &&
-        (item.children.length > 0 && item.children[0].type === children[0].type) &&
-        (item.children.length > 0 && item.children[item.children.length - 1].type === children[item.children.length - 1].type));
+        item.layoutMode === layoutMode &&
+        item.cornerRadius === cornerRadius &&
+        item.counterAxisAlignItems === counterAxisAlignItems &&
+        item.primaryAxisAlignItems === primaryAxisAlignItems &&
+        item.clipsContent === clipsContent &&
+        item.children.length === children.length);
     // проверяем, что такие объекты есть
     if (other.length === 0)
         return;
