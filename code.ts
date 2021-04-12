@@ -51,7 +51,7 @@ const createNewComponent = (selection: FrameNode): ComponentNode => {
 
 const convertChildrenToInstances = (component, children) => {
   for (const item of children) {
-    const { parent, x, y, rotation, name, fills, strokeCap, strokeAlign, strokeJoin } = item;
+    const { parent, x, y, rotation, name, fills, strokeCap, strokeAlign, strokeJoin, layoutMode } = item;
 
     const newInstance = component.createInstance();
 
@@ -65,6 +65,7 @@ const convertChildrenToInstances = (component, children) => {
     newInstance.strokeCap = strokeCap;
     newInstance.strokeAlign = strokeAlign;
     newInstance.strokeJoin = strokeJoin;
+    newInstance.layoutMode = layoutMode;
 
     item.remove();
   }
