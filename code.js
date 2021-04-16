@@ -83,7 +83,9 @@ const main = () => {
         item.counterAxisAlignItems === counterAxisAlignItems &&
         item.primaryAxisAlignItems === primaryAxisAlignItems &&
         item.clipsContent === clipsContent &&
-        item.children.length === children.length);
+        item.children.length === children.length &&
+        item.children[0].type === children[0].type &&
+        item.children[item.children.length - 1].type === children[children.length - 1].type);
     // проверяем, что такие объекты есть
     if (other.length === 0)
         return;
