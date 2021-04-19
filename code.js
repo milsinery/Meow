@@ -66,7 +66,11 @@ const main = () => {
     // проверяем, что выбран фрейм
     if (figma.currentPage.selection[0].type !== 'FRAME')
         return;
-    // проверяем, что выбранный объект вне фреймов
+    проверяем, что;
+    выбранный;
+    объект;
+    вне;
+    фреймов;
     if (figma.currentPage.selection[0].parent.type !== 'PAGE')
         return;
     // сохраняем ссылку на выбранный объект
@@ -75,17 +79,23 @@ const main = () => {
     // создаём компонент из выбранного объекта
     const newComponent = createNewComponent(selection);
     // собираем все остальные объекты на странице, похожие на выбранный
-    const other = figma.currentPage.findAll((item) => item.parent.type !== 'PAGE' &&
-        item.id !== id &&
-        item.type === 'FRAME' &&
-        item.layoutMode === layoutMode &&
-        item.cornerRadius === cornerRadius &&
-        item.counterAxisAlignItems === counterAxisAlignItems &&
-        item.primaryAxisAlignItems === primaryAxisAlignItems &&
-        item.clipsContent === clipsContent &&
-        item.children.length === children.length &&
-        item.children[0].type === children[0].type &&
-        item.children[item.children.length - 1].type === children[children.length - 1].type);
+    const other = figma.currentPage.findAll((item) => {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        return item.parent.type !== 'PAGE' &&
+            item.id !== id &&
+            item.type === 'FRAME' &&
+            item.layoutMode === layoutMode &&
+            item.counterAxisAlignItems === counterAxisAlignItems &&
+            item.primaryAxisAlignItems === primaryAxisAlignItems &&
+            item.clipsContent === clipsContent &&
+            ((_a = item.children) === null || _a === void 0 ? void 0 : _a.length) === (children === null || children === void 0 ? void 0 : children.length) &&
+            ((_b = item.children[0]) === null || _b === void 0 ? void 0 : _b.type) === ((_c = children[0]) === null || _c === void 0 ? void 0 : _c.type) &&
+            ((_d = item.children[item.children.length - 1]) === null || _d === void 0 ? void 0 : _d.type) === ((_e = children[children.length - 1]) === null || _e === void 0 ? void 0 : _e.type) &&
+            ((_f = item.children[0]) === null || _f === void 0 ? void 0 : _f.name) === ((_g = children[0]) === null || _g === void 0 ? void 0 : _g.name) &&
+            ((_h = item.children[item.children.length - 1]) === null || _h === void 0 ? void 0 : _h.name) === ((_j = children[children.length - 1]) === null || _j === void 0 ? void 0 : _j.name) &&
+            ((_k = item.children[0]) === null || _k === void 0 ? void 0 : _k.length) === ((_l = children[0]) === null || _l === void 0 ? void 0 : _l.length) &&
+            ((_m = item.children[item.children.length - 1]) === null || _m === void 0 ? void 0 : _m.length) === ((_o = children[children.length - 1]) === null || _o === void 0 ? void 0 : _o.length);
+    });
     // проверяем, что такие объекты есть
     if (other.length === 0)
         return;

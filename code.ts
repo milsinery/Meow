@@ -24,7 +24,6 @@ const createNewComponent = (selection: FrameNode): ComponentNode => {
   newComponent.strokeStyleId = selection.strokeStyleId;
   newComponent.expanded = false;
 
-
   if (selection.layoutMode !== 'NONE') {
     newComponent.layoutMode = selection.layoutMode;
     newComponent.layoutAlign = selection.layoutAlign;
@@ -79,7 +78,7 @@ const main = () => {
   // проверяем, что выбран фрейм
   if (figma.currentPage.selection[0].type !== 'FRAME') return;
 
-  // проверяем, что выбранный объект вне фреймов
+  проверяем, что выбранный объект вне фреймов
   if (figma.currentPage.selection[0].parent.type !== 'PAGE') return;
 
   // сохраняем ссылку на выбранный объект
@@ -95,14 +94,17 @@ const main = () => {
       item.parent.type !== 'PAGE' &&
       item.id !== id &&
       item.type === 'FRAME' &&
-      item.layoutMode === layoutMode && 
-      item.cornerRadius === cornerRadius && 
+      item.layoutMode === layoutMode &&  
       item.counterAxisAlignItems === counterAxisAlignItems && 
       item.primaryAxisAlignItems === primaryAxisAlignItems && 
       item.clipsContent === clipsContent && 
-      item.children.length === children.length &&
-      item.children[0].type === children[0].type &&
-      item.children[item.children.length - 1].type === children[children.length - 1].type
+      item.children?.length === children?.length &&
+      item.children[0]?.type === children[0]?.type &&
+      item.children[item.children.length - 1]?.type === children[children.length - 1]?.type && 
+      item.children[0]?.name === children[0]?.name &&
+      item.children[item.children.length - 1]?.name === children[children.length - 1]?.name &&
+      item.children[0]?.length === children[0]?.length &&
+      item.children[item.children.length - 1]?.length === children[children.length - 1]?.length
   );
 
   // проверяем, что такие объекты есть
