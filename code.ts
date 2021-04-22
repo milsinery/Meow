@@ -1,11 +1,15 @@
 const createNewComponent = (selection: FrameNode): ComponentNode => {
   const newComponent: SceneNode = figma.createComponent();
 
+  const {x, y} = selection;
+
+  selection.parent.appendChild(newComponent)
+
   newComponent.name = selection.name;
   newComponent.resize(selection.width, selection.height);
   newComponent.appendChild(selection);
-  newComponent.x = selection.x;
-  newComponent.y = selection.y;
+  newComponent.x = x;
+  newComponent.y = y;
   newComponent.rotation = selection.rotation;
   selection.x = 0;
   selection.y = 0;
@@ -71,6 +75,32 @@ const convertChildrenToInstances = (component, children) => {
   figma.notify("🐈‍");
 };
 
+ const cloneDetect = (parent, child) => {
+
+  let count = 0;
+  let result = true;
+
+  for(const item in parent) {
+    count++;
+    console.log(item)
+  }
+
+  for(let i = 0; i < count - 1; i++) {
+    if(parent[i] === "id" || parent[i] === "name" || parent[i] === "x" || parent[i] === "y") {
+      continue;
+    } else if(parent[i] === child[i]) {
+      continue;
+    } else {
+      result = false;
+    }
+  }
+
+  console.log(count);
+  console.log(result);
+
+  return result;
+}
+
 const main = () => {
   // проверяем, выделено ли что-то
   if (figma.currentPage.selection.length > 1 || figma.currentPage.selection.length === 0) return;
@@ -78,12 +108,11 @@ const main = () => {
   // проверяем, что выбран фрейм
   if (figma.currentPage.selection[0].type !== 'FRAME') return;
 
-  проверяем, что выбранный объект вне фреймов
-  if (figma.currentPage.selection[0].parent.type !== 'PAGE') return;
-
   // сохраняем ссылку на выбранный объект
   const selection: SceneNode = figma.currentPage.selection[0];
   const { id, children, layoutMode, cornerRadius, counterAxisAlignItems, primaryAxisAlignItems, clipsContent } = selection;
+
+  cloneDetect(selection, figma.currentPage.selection[0]);
 
   // создаём компонент из выбранного объекта
   const newComponent: ComponentNode = createNewComponent(selection);
@@ -91,7 +120,6 @@ const main = () => {
   // собираем все остальные объекты на странице, похожие на выбранный
   const other: Array<SceneNode> = figma.currentPage.findAll(
     (item) => 
-      item.parent.type !== 'PAGE' &&
       item.id !== id &&
       item.type === 'FRAME' &&
       item.layoutMode === layoutMode &&  

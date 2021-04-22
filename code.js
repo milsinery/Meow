@@ -1,10 +1,12 @@
 const createNewComponent = (selection) => {
     const newComponent = figma.createComponent();
+    const { x, y } = selection;
+    selection.parent.appendChild(newComponent);
     newComponent.name = selection.name;
     newComponent.resize(selection.width, selection.height);
     newComponent.appendChild(selection);
-    newComponent.x = selection.x;
-    newComponent.y = selection.y;
+    newComponent.x = x;
+    newComponent.y = y;
     newComponent.rotation = selection.rotation;
     selection.x = 0;
     selection.y = 0;
@@ -59,6 +61,28 @@ const convertChildrenToInstances = (component, children) => {
     }
     figma.notify("🐈‍");
 };
+const cloneDetect = (parent, child) => {
+    let count = 0;
+    let result = true;
+    for (const item in parent) {
+        count++;
+        console.log(item);
+    }
+    for (let i = 0; i < count - 1; i++) {
+        if (parent[i] === "id" || parent[i] === "name" || parent[i] === "x" || parent[i] === "y") {
+            continue;
+        }
+        else if (parent[i] === child[i]) {
+            continue;
+        }
+        else {
+            result = false;
+        }
+    }
+    console.log(count);
+    console.log(result);
+    return result;
+};
 const main = () => {
     // проверяем, выделено ли что-то
     if (figma.currentPage.selection.length > 1 || figma.currentPage.selection.length === 0)
@@ -66,23 +90,16 @@ const main = () => {
     // проверяем, что выбран фрейм
     if (figma.currentPage.selection[0].type !== 'FRAME')
         return;
-    проверяем, что;
-    выбранный;
-    объект;
-    вне;
-    фреймов;
-    if (figma.currentPage.selection[0].parent.type !== 'PAGE')
-        return;
     // сохраняем ссылку на выбранный объект
     const selection = figma.currentPage.selection[0];
     const { id, children, layoutMode, cornerRadius, counterAxisAlignItems, primaryAxisAlignItems, clipsContent } = selection;
+    cloneDetect(selection, figma.currentPage.selection[0]);
     // создаём компонент из выбранного объекта
     const newComponent = createNewComponent(selection);
     // собираем все остальные объекты на странице, похожие на выбранный
     const other = figma.currentPage.findAll((item) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-        return item.parent.type !== 'PAGE' &&
-            item.id !== id &&
+        return item.id !== id &&
             item.type === 'FRAME' &&
             item.layoutMode === layoutMode &&
             item.counterAxisAlignItems === counterAxisAlignItems &&
