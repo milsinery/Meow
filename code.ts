@@ -124,6 +124,9 @@ const createNewComponent = (selection: FrameNode): ComponentNode => {
 
 const convertChildrenToInstances = (component, children) => {
   for (const item of children) {
+    const itemText = item.findAll(item => item.type === "TEXT").map(item => item.characters);
+    const itemImages = item.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE").map(item => item.imageHash);
+
     const {
       name,
       visible,
@@ -232,6 +235,22 @@ const convertChildrenToInstances = (component, children) => {
     newInstance.numberOfFixedChildren = numberOfFixedChildren;
 
     parent.appendChild(newInstance);
+
+    const instaceText = newInstance.findAll(item => item.type === "TEXT");
+    const instanceImages = newInstance.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE");
+
+    // TODO
+    const imageChanger = async (original, newInstance) => {}
+
+    const changer = async (original, newInstance) => {
+      await figma.loadFontAsync(newInstance.fontName);
+      newInstance.characters = original;
+    }
+
+    for(let i = 0; i < itemText.length; i++) {
+      changer(itemText[i], instaceText[i]);
+      // imageChanger(itemImages[i], instanceImages[i]);
+    }
 
     item.remove();
   }

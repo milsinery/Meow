@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const createNewComponent = (selection) => {
     const newComponent = figma.createComponent();
     const { name, visible, locked, opacity, blendMode, isMask, effects, effectStyleId, relativeTransform, x, y, width, height, rotation, layoutAlign, constrainProportions, layoutGrow, children, exportSettings, fills, fillStyleId, strokes, strokeStyleId, strokeWeight, strokeAlign, strokeCap, strokeJoin, strokeMiterLimit, dashPattern, cornerRadius, cornerSmoothing, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, gridStyleId, backgrounds, backgroundStyleId, clipsContent, guides, expanded, constraints, layoutMode, itemSpacing, overflowDirection, numberOfFixedChildren, } = selection;
@@ -62,6 +71,8 @@ const createNewComponent = (selection) => {
 };
 const convertChildrenToInstances = (component, children) => {
     for (const item of children) {
+        const itemText = item.findAll(item => item.type === "TEXT").map(item => item.characters);
+        const itemImages = item.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE").map(item => item.imageHash);
         const { name, visible, locked, opacity, blendMode, isMask, effects, effectStyleId, relativeTransform, x, y, rotation, layoutAlign, constrainProportions, layoutGrow, exportSettings, fills, fillStyleId, strokes, strokeStyleId, strokeWeight, strokeAlign, strokeCap, strokeJoin, strokeMiterLimit, dashPattern, cornerRadius, cornerSmoothing, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, gridStyleId, backgrounds, backgroundStyleId, clipsContent, guides, expanded, constraints, layoutMode, parent, itemSpacing, numberOfFixedChildren, } = item;
         const newInstance = component.createInstance();
         newInstance.name = name;
@@ -115,6 +126,18 @@ const convertChildrenToInstances = (component, children) => {
         newInstance.itemSpacing = itemSpacing;
         newInstance.numberOfFixedChildren = numberOfFixedChildren;
         parent.appendChild(newInstance);
+        const instaceText = newInstance.findAll(item => item.type === "TEXT");
+        const instanceImages = newInstance.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE");
+        // TODO
+        const imageChanger = (original, newInstance) => __awaiter(this, void 0, void 0, function* () { });
+        const changer = (original, newInstance) => __awaiter(this, void 0, void 0, function* () {
+            yield figma.loadFontAsync(newInstance.fontName);
+            newInstance.characters = original;
+        });
+        for (let i = 0; i < itemText.length; i++) {
+            changer(itemText[i], instaceText[i]);
+            // imageChanger(itemImages[i], instanceImages[i]);
+        }
         item.remove();
     }
 };
