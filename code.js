@@ -7,6 +7,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+const setPluginLinkToSidebar = () => {
+    const allObjects = figma.currentPage.findAll((item) => item.type === "FRAME");
+    for (const item of allObjects) {
+        item.setRelaunchData({ edit: '' });
+    }
+};
 const createNewComponent = (selection) => {
     const newComponent = figma.createComponent();
     const { name, visible, locked, opacity, blendMode, isMask, effects, effectStyleId, relativeTransform, x, y, width, height, rotation, layoutAlign, constrainProportions, layoutGrow, children, exportSettings, fills, fillStyleId, strokes, strokeStyleId, strokeWeight, strokeAlign, strokeCap, strokeJoin, strokeMiterLimit, dashPattern, cornerRadius, cornerSmoothing, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, gridStyleId, backgrounds, backgroundStyleId, clipsContent, guides, expanded, constraints, layoutMode, itemSpacing, overflowDirection, numberOfFixedChildren, } = selection;
@@ -71,8 +77,10 @@ const createNewComponent = (selection) => {
 };
 const convertChildrenToInstances = (component, children) => {
     for (const item of children) {
-        const itemText = item.findAll(item => item.type === "TEXT").map(item => item.characters);
-        const itemImages = item.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE").map(item => item.imageHash);
+        const itemText = item
+            .findAll((item) => item.type === 'TEXT')
+            .map((item) => item.characters);
+        const itemImages = item.findAll((item) => item.fills && item.fills[0] && item.fills[0].type === 'IMAGE');
         const { name, visible, locked, opacity, blendMode, isMask, effects, effectStyleId, relativeTransform, x, y, rotation, layoutAlign, constrainProportions, layoutGrow, exportSettings, fills, fillStyleId, strokes, strokeStyleId, strokeWeight, strokeAlign, strokeCap, strokeJoin, strokeMiterLimit, dashPattern, cornerRadius, cornerSmoothing, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, gridStyleId, backgrounds, backgroundStyleId, clipsContent, guides, expanded, constraints, layoutMode, parent, itemSpacing, numberOfFixedChildren, } = item;
         const newInstance = component.createInstance();
         newInstance.name = name;
@@ -126,17 +134,21 @@ const convertChildrenToInstances = (component, children) => {
         newInstance.itemSpacing = itemSpacing;
         newInstance.numberOfFixedChildren = numberOfFixedChildren;
         parent.appendChild(newInstance);
-        const instaceText = newInstance.findAll(item => item.type === "TEXT");
-        const instanceImages = newInstance.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE");
-        // TODO
-        const imageChanger = (original, newInstance) => __awaiter(this, void 0, void 0, function* () { });
+        const instaceText = newInstance.findAll((item) => item.type === 'TEXT');
+        const instanceImages = newInstance.findAll((item) => item.fills && item.fills[0] && item.fills[0].type === 'IMAGE');
+        const imageChanger = (original, newInstance) => {
+            if (original === undefined)
+                return;
+            const fills = JSON.parse(JSON.stringify(original.fills));
+            newInstance.fills = fills;
+        };
         const changer = (original, newInstance) => __awaiter(this, void 0, void 0, function* () {
             yield figma.loadFontAsync(newInstance.fontName);
             newInstance.characters = original;
         });
         for (let i = 0; i < itemText.length; i++) {
             changer(itemText[i], instaceText[i]);
-            // imageChanger(itemImages[i], instanceImages[i]);
+            imageChanger(itemImages[i], instanceImages[i]);
         }
         item.remove();
     }
@@ -154,10 +166,11 @@ const parentIsDirty = (obj) => {
     }
 };
 const childrenIsDirty = (obj) => {
-    const result = obj.findAll(item => item.type === "COMPONENT");
+    const result = obj.findAll((item) => item.type === 'COMPONENT');
     return result.length > 0 ? true : false;
 };
 const main = () => {
+    setPluginLinkToSidebar();
     if (figma.currentPage.selection.length > 1 ||
         figma.currentPage.selection.length === 0) {
         figma.notify('👀 Select a frame and run the plugin', { timeout: 3000 });
@@ -174,12 +187,12 @@ const main = () => {
         return;
     }
     if (childrenIsDirty(figma.currentPage.selection[0])) {
-        figma.notify("🕵️ There is a component inside the frame", { timeout: 3000 });
+        figma.notify('🕵️ There is a component inside the frame', { timeout: 3000 });
         return;
     }
     const selection = figma.currentPage.selection[0];
     const newComponent = createNewComponent(selection);
-    const { id, layoutAlign, constrainProportions, layoutGrow, children, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, clipsContent, guides, constraints, layoutMode, itemSpacing, overflowDirection, numberOfFixedChildren, overlayPositionType } = newComponent;
+    const { id, layoutAlign, constrainProportions, layoutGrow, children, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, clipsContent, guides, constraints, layoutMode, itemSpacing, overflowDirection, numberOfFixedChildren, overlayPositionType, } = newComponent;
     const other = figma.currentPage.findAll((item) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         return !parentIsDirty(item) &&
@@ -219,7 +232,9 @@ const main = () => {
         return;
     }
     convertChildrenToInstances(newComponent, other);
-    figma.notify(`🐈 Done! Instances created — ${other.length}`, { timeout: 5000 });
+    figma.notify(`🐈 Done! Instances created — ${other.length}`, {
+        timeout: 5000,
+    });
 };
 main();
 figma.closePlugin();

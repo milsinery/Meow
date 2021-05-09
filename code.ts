@@ -1,3 +1,13 @@
+const setPluginLinkToSidebar = () => {
+  const allObjects = figma.currentPage.findAll(
+    (item) => item.type === "FRAME"
+  );
+
+  for (const item of allObjects) {
+    item.setRelaunchData({ edit: '' });
+  }
+};
+
 const createNewComponent = (selection: FrameNode): ComponentNode => {
   const newComponent: SceneNode = figma.createComponent();
 
@@ -124,8 +134,12 @@ const createNewComponent = (selection: FrameNode): ComponentNode => {
 
 const convertChildrenToInstances = (component, children) => {
   for (const item of children) {
-    const itemText = item.findAll(item => item.type === "TEXT").map(item => item.characters);
-    const itemImages = item.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE").map(item => item.imageHash);
+    const itemText = item
+      .findAll((item) => item.type === 'TEXT')
+      .map((item) => item.characters);
+    const itemImages = item.findAll(
+      (item) => item.fills && item.fills[0] && item.fills[0].type === 'IMAGE'
+    );
 
     const {
       name,
@@ -236,20 +250,26 @@ const convertChildrenToInstances = (component, children) => {
 
     parent.appendChild(newInstance);
 
-    const instaceText = newInstance.findAll(item => item.type === "TEXT");
-    const instanceImages = newInstance.findAll(item => item.fills && item.fills[0] && item.fills[0].type === "IMAGE");
+    const instaceText = newInstance.findAll((item) => item.type === 'TEXT');
+    const instanceImages = newInstance.findAll(
+      (item) => item.fills && item.fills[0] && item.fills[0].type === 'IMAGE'
+    );
 
-    // TODO
-    const imageChanger = async (original, newInstance) => {}
+    const imageChanger = (original, newInstance) => {
+      if (original === undefined) return;
+
+      const fills = JSON.parse(JSON.stringify(original.fills));
+      newInstance.fills = fills;
+    };
 
     const changer = async (original, newInstance) => {
       await figma.loadFontAsync(newInstance.fontName);
       newInstance.characters = original;
-    }
+    };
 
-    for(let i = 0; i < itemText.length; i++) {
+    for (let i = 0; i < itemText.length; i++) {
       changer(itemText[i], instaceText[i]);
-      // imageChanger(itemImages[i], instanceImages[i]);
+      imageChanger(itemImages[i], instanceImages[i]);
     }
 
     item.remove();
@@ -271,12 +291,14 @@ const parentIsDirty = (obj): boolean => {
 };
 
 const childrenIsDirty = (obj): boolean => {
-  const result = obj.findAll(item => item.type === "COMPONENT")
+  const result = obj.findAll((item) => item.type === 'COMPONENT');
 
   return result.length > 0 ? true : false;
 };
 
 const main = () => {
+  setPluginLinkToSidebar();
+
   if (
     figma.currentPage.selection.length > 1 ||
     figma.currentPage.selection.length === 0
@@ -297,8 +319,8 @@ const main = () => {
     return;
   }
 
-  if(childrenIsDirty(figma.currentPage.selection[0])) {
-    figma.notify("🕵️ There is a component inside the frame", { timeout: 3000})
+  if (childrenIsDirty(figma.currentPage.selection[0])) {
+    figma.notify('🕵️ There is a component inside the frame', { timeout: 3000 });
     return;
   }
 
@@ -327,7 +349,7 @@ const main = () => {
     itemSpacing,
     overflowDirection,
     numberOfFixedChildren,
-    overlayPositionType
+    overlayPositionType,
   } = newComponent;
 
   const other = figma.currentPage.findAll(
@@ -356,11 +378,14 @@ const main = () => {
       JSON.stringify(item.constraints) === JSON.stringify(constraints) &&
       item?.children?.length === children?.length &&
       item?.children[0]?.type === children[0]?.type &&
-      item?.children[item.children.length - 1]?.type === children[children.length - 1]?.type &&
+      item?.children[item.children.length - 1]?.type ===
+        children[children.length - 1]?.type &&
       item?.children[0]?.name === children[0]?.name &&
-      item?.children[item.children.length - 1]?.name === children[children.length - 1]?.name &&
+      item?.children[item.children.length - 1]?.name ===
+        children[children.length - 1]?.name &&
       item?.children[0]?.length === children[0]?.length &&
-      item?.children[item.children.length - 1]?.length === children[children.length - 1]?.length 
+      item?.children[item.children.length - 1]?.length ===
+        children[children.length - 1]?.length
   );
 
   if (other.length === 0) {
@@ -372,10 +397,9 @@ const main = () => {
 
   convertChildrenToInstances(newComponent, other);
 
-  figma.notify(
-    `🐈 Done! Instances created — ${other.length}`,
-    { timeout: 5000 }
-  );
+  figma.notify(`🐈 Done! Instances created — ${other.length}`, {
+    timeout: 5000,
+  });
 };
 
 main();
