@@ -1,7 +1,5 @@
 const setPluginLinkToSidebar = () => {
-  const allObjects = figma.currentPage.findAll(
-    (item) => item.type === "FRAME"
-  );
+  const allObjects = figma.currentPage.findAll((item) => item.type === 'FRAME');
 
   for (const item of allObjects) {
     item.setRelaunchData({ edit: '' });
