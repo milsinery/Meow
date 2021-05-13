@@ -7,12 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const setPluginLinkToSidebar = () => {
-    const allObjects = figma.currentPage.findAll((item) => item.type === 'FRAME');
-    for (const item of allObjects) {
-        item.setRelaunchData({ edit: '' });
-    }
-};
 const createNewComponent = (selection) => {
     const newComponent = figma.createComponent();
     const { name, visible, locked, opacity, blendMode, isMask, effects, effectStyleId, relativeTransform, x, y, width, height, rotation, layoutAlign, constrainProportions, layoutGrow, children, exportSettings, fills, fillStyleId, strokes, strokeStyleId, strokeWeight, strokeAlign, strokeCap, strokeJoin, strokeMiterLimit, dashPattern, cornerRadius, cornerSmoothing, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, gridStyleId, backgrounds, backgroundStyleId, clipsContent, guides, expanded, constraints, layoutMode, itemSpacing, overflowDirection, numberOfFixedChildren, } = selection;
@@ -170,7 +164,7 @@ const childrenIsDirty = (obj) => {
     return result.length > 0 ? true : false;
 };
 const main = () => {
-    setPluginLinkToSidebar();
+    figma.currentPage.setRelaunchData({ edit: 'Run Meow!', open: '' });
     if (figma.currentPage.selection.length > 1 ||
         figma.currentPage.selection.length === 0) {
         figma.notify('👀 Select a frame and run the plugin', { timeout: 3000 });

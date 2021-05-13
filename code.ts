@@ -1,11 +1,3 @@
-const setPluginLinkToSidebar = () => {
-  const allObjects = figma.currentPage.findAll((item) => item.type === 'FRAME');
-
-  for (const item of allObjects) {
-    item.setRelaunchData({ edit: '' });
-  }
-};
-
 const createNewComponent = (selection: FrameNode): ComponentNode => {
   const newComponent: SceneNode = figma.createComponent();
 
@@ -295,8 +287,8 @@ const childrenIsDirty = (obj): boolean => {
 };
 
 const main = () => {
-  setPluginLinkToSidebar();
-
+  figma.currentPage.setRelaunchData({ edit: 'Run Meow!', open: '' });
+  
   if (
     figma.currentPage.selection.length > 1 ||
     figma.currentPage.selection.length === 0
