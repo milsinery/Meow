@@ -75,8 +75,9 @@ const convertChildrenToInstances = (component, children) => {
             .findAll((item) => item.type === 'TEXT')
             .map((item) => item.characters);
         const itemImages = item.findAll((item) => item.fills && item.fills[0] && item.fills[0].type === 'IMAGE');
-        const { name, visible, locked, opacity, blendMode, isMask, effects, effectStyleId, relativeTransform, x, y, rotation, layoutAlign, constrainProportions, layoutGrow, exportSettings, fills, fillStyleId, strokes, strokeStyleId, strokeWeight, strokeAlign, strokeCap, strokeJoin, strokeMiterLimit, dashPattern, cornerRadius, cornerSmoothing, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, gridStyleId, backgrounds, backgroundStyleId, clipsContent, guides, expanded, constraints, layoutMode, parent, itemSpacing, numberOfFixedChildren, } = item;
+        const { name, visible, locked, opacity, blendMode, isMask, effects, effectStyleId, relativeTransform, x, y, rotation, layoutAlign, constrainProportions, layoutGrow, exportSettings, fills, fillStyleId, strokes, strokeStyleId, strokeWeight, strokeAlign, strokeCap, strokeJoin, strokeMiterLimit, dashPattern, cornerRadius, cornerSmoothing, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, paddingLeft, paddingRight, paddingTop, paddingBottom, primaryAxisAlignItems, counterAxisAlignItems, primaryAxisSizingMode, layoutGrids, gridStyleId, backgrounds, backgroundStyleId, clipsContent, guides, expanded, constraints, layoutMode, parent, width, height, itemSpacing, numberOfFixedChildren, } = item;
         const newInstance = component.createInstance();
+        newInstance.resize(width, height);
         newInstance.name = name;
         newInstance.visible = visible;
         newInstance.locked = locked;

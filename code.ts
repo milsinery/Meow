@@ -181,12 +181,15 @@ const convertChildrenToInstances = (component, children) => {
       constraints,
       layoutMode,
       parent,
+      width,
+      height,
       itemSpacing,
       numberOfFixedChildren,
     } = item;
 
     const newInstance = component.createInstance();
 
+    newInstance.resize(width, height);
     newInstance.name = name;
     newInstance.visible = visible;
     newInstance.locked = locked;
